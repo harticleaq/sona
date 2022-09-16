@@ -1,0 +1,16 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource>
+<file alias="icons/保存.png">icons/保存.png</file>
+<file alias="icons/文件.png">icons/文件.png</file>
+<file alias="icons/转换 (2).png">icons/转换 (2).png</file>
+<file alias="icons/波形图 (1).png">icons/波形图 (1).png</file>
+<file alias="icons/波形图.png">icons/波形图.png</file>
+<file alias="icons/开始-default.png">icons/开始-default.png</file>
+<file alias="icons/路径 (1).png">icons/路径 (1).png</file>
+<file alias="icons/确认.png">icons/确认.png</file>
+<file alias="icons/brief-1-1.jpg">icons/brief-1-1.jpg</file>
+<file alias="icons/briefdown.jpg">icons/briefdown.jpg</file>
+<file alias="icons/logging.json">icons/logging.json</file>
+</qresource>
+</RCC>
