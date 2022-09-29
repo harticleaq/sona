@@ -4,12 +4,13 @@ import scipy.io.wavfile as wf
 import  os
 
 
-def resample(inpath,outrate,outpath):
+def resample(inpath, outrate, outpath):
     outrate = int(outrate)
     file = inpath.split('/')[-1]
     if inpath.endswith('.wav'):
         try:
-            sample,sig = wf.read(inpath)
+            sample, sig = wf.read(inpath)
+            sig = sig.reshape(-1)
             manner = len(sig.shape)
             if manner == 1:
                downsampleWav1(inpath, outpath+'/sample_'+file, inrate=int(sample), outrate=outrate)
@@ -19,6 +20,7 @@ def resample(inpath,outrate,outpath):
                return 'true'
         except:
             return 'error'
+
 def resample2(inpath,outrate,outpath):
        wav_list = sorted([i for i in os.listdir(inpath) if i.endswith('.wav')])
        for i in wav_list:

@@ -38,12 +38,12 @@ def save_waveform(output_path, params, amp):
     output_file.close()
 
 def addNoise(clean_file,noise_file,snr,output_path):
-    noise_file += os.listdir(noise_file)[-1]
+    # noise_file += os.listdir(noise_file)[-1]
     if clean_file[-4:] != '.wav':
         clean_list = os.listdir(clean_file)
         for file in clean_list:
            outfile = output_path +'noise'+ noise_file[-5]+'_%ddb_'%snr+file
-           addNoise1(clean_file+file,noise_file,snr,outfile)
+           addNoise1(clean_file + '/' + file,noise_file,snr,outfile)
     else:
         outfile = output_path + noise_file[:-4]+'_%ddb_'%snr+clean_file
         addNoise1(clean_file,noise_file,snr,outfile)
@@ -53,7 +53,7 @@ def addNoise1(clean_file,noise_file,snr,output_path):
 
     clean_file = clean_file
     noise_file = noise_file
-    print(clean_file,noise_file)
+    print(clean_file, noise_file)
     clean_wav = wave.open(clean_file, "r")
     noise_wav = wave.open(noise_file, "r")
 

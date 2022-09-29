@@ -15,6 +15,9 @@ from karman import karmanfilter
 from pylab import mpl
 import batch_sample
 from experiments.trainclass import train_class
+from create_mixed_audio_file import addNoise
+import sonaModel
+
 
 class SonaWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -29,6 +32,9 @@ class SonaWindow(QtWidgets.QWidget):
         self.noisefile = ''
         self.line_filepath=''
         self.line_filepath_out=''
+        self.line_noisepath = None
+        self.line_cleanpath = None
+        self.line_noisypath = None
 
     def initUI(self):
         self.setWindowTitle('Sona波形处理')
@@ -830,17 +836,41 @@ class SonaWindow(QtWidgets.QWidget):
             for i in range(len(files)):
                 self.rightWidget7_down_widget_layout_w1.append(f'选取的文件是:{files[i]}, 类型是:{data_dic[int(pre_ys[i][0])]}')
 
+    def addNoise(self,widget,line_cleanpath,line_noisepath,line_noisypath,line_snr):
+        if os.path.exists(line_cleanpath) and os.path.exists(line_noisepath) and os.path.exists(line_noisypath):
+            if line_snr is not None:
+                addNoise(line_cleanpath, line_noisepath, int(line_snr), line_noisypath + '/')
+                self.rightWidget6_down_widget_layout_w2.setText('')
+                files = os.listdir(line_cleanpath)
+                length = len(files)
+                self.rightWidget6_down_widget_layout_w2.append(f'{line_noisypath}中，共%d个文件加噪完成！'%length)
+                widget.close()
+
+
+            else:
+                QtWidgets.QMessageBox.information(self,'信息提示','未设置信噪比!')
+        else:
+            QtWidgets.QMessageBox.information(self,'信息提示','路径设置错误!')
 
     def sub_add_Noise(self):
         # 窗口6 增加噪声
         widget = QtWidgets.QDialog()
         layout = QtWidgets.QFormLayout()
-        line_cleanpath = QtWidgets.QLineEdit()
-        layout.addRow('原始文件路径：', line_cleanpath)
-        line_noisepath = QtWidgets.QLineEdit()
-        layout.addRow('带噪文件路径：', line_noisepath)
-        line_noisypath = QtWidgets.QLineEdit()
-        layout.addRow('输出文件路径：', line_noisypath)
+
+        line_cleanbtn = QtWidgets.QPushButton('原始文件')
+        line_cleanbtn.clicked.connect(self.sample_files)
+        layout.addRow('原始文件路径：', line_cleanbtn)
+        line_noisebtn = QtWidgets.QPushButton('带噪文件')
+        line_noisebtn.clicked.connect(self.sample_batch_files)
+        layout.addRow('噪音文件路径：', line_noisebtn)
+        line_noisybtn = QtWidgets.QPushButton('输出文件')
+        line_noisybtn.clicked.connect(self.sample_files)
+
+
+
+        layout.addRow('输出文件路径：', line_noisybtn)
+
+
 
         line_snr = QtWidgets.QLineEdit()
         line_snr.setText('5')
@@ -849,7 +879,7 @@ class SonaWindow(QtWidgets.QWidget):
         layout.addWidget(btn)
         widget.setLayout(layout)
         btn.clicked.connect(
-            lambda: self.addNoise(widget, line_cleanpath.text(), line_noisepath.text(), line_noisypath.text(),
+            lambda: self.addNoise(widget, self.line_cleanpath, self.line_noisepath, self.line_noisypath,
                                   line_snr.text()))
 
         widget.exec_()
@@ -859,6 +889,8 @@ class SonaWindow(QtWidgets.QWidget):
         #窗口6 建模
         widget = QtWidgets.QDialog()
         layout = QtWidgets.QFormLayout()
+
+
         line_cleanpath = QtWidgets.QLineEdit()
         layout.addRow('原始文件路径：',line_cleanpath)
         line_noisypath = QtWidgets.QLineEdit()
@@ -883,12 +915,20 @@ class SonaWindow(QtWidgets.QWidget):
         path = QtWidgets.QFileDialog.getExistingDirectory(None,'选取待处理文件夹',os.getcwd())
         if self.sender().text() == '输出':
             self.line_filepath_out = path
+        elif self.sender().text()=='原始文件':
+            self.line_cleanpath = path
+        elif self.sender().text() == '输出文件':
+            self.line_noisypath = path
 
     def sample_batch_files(self):
         path = QtWidgets.QFileDialog.getOpenFileName(None, '选取单个文件', os.getcwd()
                                                         , 'WAV File(*.wav)')
         if self.sender().text()=='输入':
-            self.line_filepath = path
+            self.line_filepath = path[0]
+        elif self.sender().text() == '带噪文件':
+            self.line_noisepath = path[0]
+
+
 
 
 
@@ -980,6 +1020,7 @@ class SonaWindow(QtWidgets.QWidget):
         remove_btn_renoise.clicked.connect(self.karmannoise)
         # remove_btn_save.clicked.connect()
         removewidget.show()
+
     def karmansave(self):
         if not self.noisefile:
             return
